@@ -52,10 +52,10 @@ class CardDateFormatterMask: CHRCardNumberMask {
                 result = string + kCardFormatterMaskDashFormatted
             } else if string.count == 3 {
                 //Добавление разделителя в середину строки
-                let startIndex = string.index(string.startIndex, offsetBy: 2)
+                let startIndex = string.index(string.startIndex, offsetBy: 1)
                 let endIndex = string.index(startIndex, offsetBy: 1)
-                let substring1 = String(string![startIndex...])
-                let substring2 =  String(string![startIndex...endIndex])
+                let substring1 = String(string![...startIndex])
+                let substring2 =  String(string![endIndex...])
                 result = String(format: "%@%@%@", substring1, kCardFormatterMaskDashFormatted, substring2)
             } else {
                 result = NSString(string: string).replacingOccurrences(of: kCardFormatterMaskDashUnformatted, with: kCardFormatterMaskDashFormatted)

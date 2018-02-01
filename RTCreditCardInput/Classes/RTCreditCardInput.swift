@@ -112,7 +112,7 @@ public class RTCreditCardInput: NSObject {
         
         // #todo : deal with ! near 'text'
         let expirationDateError = self.cardValidationService.getExpirationDateError(cardExpirationDateString: self.expirationDateFormatter.unmaskedString(from: self.cardExpirationDateTextField.text!))
-        if expirationDateError.isEmpty {
+        if !expirationDateError.isEmpty {
             // #todo
             // [NotificationManager postNotificationThreadSafe:expirationDateError withUserInfo:nil]
             return
