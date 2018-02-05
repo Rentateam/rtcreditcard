@@ -22,9 +22,9 @@ public class RTCreditCardInput: NSObject {
     public weak var view: UIView!
     private var cardValidation: CardValidationProtocol
     private var cardValidationDecorator: CardValidationDecoratorProtocol
-    private var cardCheckDelegate: CardCheckDelegate
+    private var cardCheckDelegate: CardCheckDelegateProtocol
     
-    public init(cardValidation: CardValidationProtocol, cardValidationDecorator: CardValidationDecoratorProtocol, cardCheckDelegate: CardCheckDelegate) {
+    public init(cardValidation: CardValidationProtocol, cardValidationDecorator: CardValidationDecoratorProtocol, cardCheckDelegate: CardCheckDelegateProtocol) {
         self.cardValidation = cardValidation
         self.cardValidationDecorator = cardValidationDecorator
         self.cardCheckDelegate = cardCheckDelegate
