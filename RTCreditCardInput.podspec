@@ -8,8 +8,8 @@
 
 Pod::Spec.new do |s|
   s.name             = 'RTCreditCardInput'
-  s.version          = '0.1.0'
-  s.summary          = 'A short description of RTCreditCardInput.'
+  s.version          = '0.1.1'
+  s.summary          = 'A helper library to add card payment into your app'
 
 # This description is used to generate tags and improve search results.
 #   * Think: What does it do? Why did you write it? What is the focus?
@@ -18,25 +18,18 @@ Pod::Spec.new do |s|
 #   * Finally, don't worry about the indent, CocoaPods strips it!
 
   s.description      = <<-DESC
-TODO: Add long description of the pod here.
+It is a library to add card payment ability into your application. It is used for convenient handling card input form, format and validate it. 
+You can provide your own validation and error decoration logic.
+See the embedded example in example folder.
                        DESC
 
-  s.homepage         = 'https://github.com/Aleksei Unshchikov/RTCreditCardInput'
-  # s.screenshots     = 'www.example.com/screenshots_1', 'www.example.com/screenshots_2'
+  s.homepage         = 'git@bitbucket.org:rentateam/rtcreditcard.git'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
-  s.author           = { 'Aleksei Unshchikov' => 'rgiggs@yandex.ru' }
-  s.source           = { :git => 'https://github.com/Aleksei Unshchikov/RTCreditCardInput.git', :tag => s.version.to_s }
-  # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
+  s.author           = { 'RentaTeam' => 'info@rentateam.ru' }
+  s.source           = { :git => 'https://bitbucket.org:rentateam/rtcreditcard.git', :tag => s.version.to_s }
 
-  s.ios.deployment_target = '8.0'
+  s.ios.deployment_target = '9.0'
 
   s.source_files = 'RTCreditCardInput/Classes/**/*'
-  
-  # s.resource_bundles = {
-  #   'RTCreditCardInput' => ['RTCreditCardInput/Assets/*.png']
-  # }
-
-  # s.public_header_files = 'Pod/Classes/**/*.h'
-  # s.frameworks = 'UIKit', 'MapKit'
   s.dependency 'CHRTextFieldFormatter', '~> 1.0.1'
 end
