@@ -21,7 +21,7 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        self.input = RTCreditCardInput(cardValidationService: CardValidationService())
+        self.input = RTCreditCardInput(cardValidationService: CardDefaultValidationService())
         self.input.cardCVVTextField = self.tfCvv
         self.input.cardExpirationDateTextField = self.tfDate
         self.input.cardholderTextField = self.tfCardholder

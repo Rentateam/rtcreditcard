@@ -10,22 +10,22 @@ import CHRTextFieldFormatter
 
 class CvvNumberFormatterMask: CHRCardNumberMask {
     
-    override func shouldChange(_ text: String!, withReplacementString string: String!, in range: NSRange) -> Bool {
+    override func shouldChange(_ text: String, withReplacementString string: String, in range: NSRange) -> Bool {
         let newString = NSString(string: text).replacingCharacters(in: range, with: string)
         return newString.count <= 3;
     }
     
-    override func filteredString(from string: String!, cursorPosition: UnsafeMutablePointer<UInt>!) -> String! {
-        let originalCursorPosition = cursorPosition == nil ? 0 : cursorPosition.pointee
+    override func filteredString(from string: String, cursorPosition: UnsafeMutablePointer<UInt>?) -> String {
+        let originalCursorPosition = cursorPosition?.pointee ?? 0
         var digitsOnlyString = ""
         for i in 0..<string.count {
             let characterToAdd = string[string.index(string.startIndex, offsetBy: i)]
             if "0"..."9" ~= characterToAdd {
                 digitsOnlyString.append(characterToAdd)
             } else {
-                if i < originalCursorPosition {
+                if UInt(bitPattern: i) < originalCursorPosition {
                     if cursorPosition != nil {
-                        cursorPosition.pointee -= 1
+                        cursorPosition?.pointee -= 1
                     }
                 }
             }
@@ -34,7 +34,7 @@ class CvvNumberFormatterMask: CHRCardNumberMask {
         return digitsOnlyString;
     }
     
-    override func formattedString(from string: String!, cursorPosition: UnsafeMutablePointer<UInt>!) -> String! {
+    override func formattedString(from string: String, cursorPosition: UnsafeMutablePointer<UInt>?) -> String {
         return string
     }
 }

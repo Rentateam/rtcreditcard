@@ -10,15 +10,6 @@ import UIKit
 import CHRTextFieldFormatter
 
 public class RTCreditCardInput: NSObject {
-    
-    // #todo : deal with it
-    public static let kNotificationCardIncorrectNumber = "NotificationCardIncorrectNumber"
-    public static let kNotificationCardIncorrectCardholder = "kNotificationCardIncorrectCardholder"
-    public static let kNotificationCardIncorrectCVV = "NotificationCardIncorrectCVV"
-    public static let kNotificationCardIncorrectDate = "NotificationCardIncorrectDate"
-    public static let kNotificationCardInvalid = "NotificationCardInvalid"
-    public static let kNotificationCardFormValid = "NotificationCardFormValid"
-    
     var cardNumberFormatter: CHRTextFieldFormatter!
     var cardCVVFormatter: CHRTextFieldFormatter!
     var expirationDateFormatter: CHRTextFieldFormatter!
@@ -29,28 +20,16 @@ public class RTCreditCardInput: NSObject {
     public weak var cardExpirationDateTextField: UITextField!
     public weak var cardCVVTextField: UITextField!
     public weak var view: UIView!
-    private var cardValidationService: CardValidationServiceProtocol
+    private var cardValidation: CardValidationProtocol
+    private var cardValidationDecorator: CardValidationDecoratorProtocol
+    private var cardCheckDelegate: CardCheckDelegate
     
-    public init(cardValidationService: CardValidationServiceProtocol) {
-        self.cardValidationService = cardValidationService
-        // #todo may be get rid of notifications
-//        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onCardIncorrectNumber:) name:kNotificationCardIncorrectNumber object:nil];
-//        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onCardIncorrectOwner:) name:kNotificationCardIncorrectOwner object:nil];
-//        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onCardIncorrectCVV:) name:kNotificationCardIncorrectCVV object:nil];
-//        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onCardIncorrectDate:) name:kNotificationCardIncorrectDate object:nil];
-//        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onCardIncorrectNumber:) name:kNotificationCardInvalid object:nil];
+    public init(cardValidation: CardValidationProtocol, cardValidationDecorator: CardValidationDecoratorProtocol, cardCheckDelegate: CardCheckDelegate) {
+        self.cardValidation = cardValidation
+        self.cardValidationDecorator = cardValidationDecorator
+        self.cardCheckDelegate = cardCheckDelegate
     }
     
-    
-    deinit {
-        // #todo
-//        [[NSNotificationCenter defaultCenter] removeObserver:self name:kNotificationCardIncorrectNumber object:nil];
-//        [[NSNotificationCenter defaultCenter] removeObserver:self name:kNotificationCardIncorrectOwner object:nil];
-//        [[NSNotificationCenter defaultCenter] removeObserver:self name:kNotificationCardIncorrectCVV object:nil];
-//        [[NSNotificationCenter defaultCenter] removeObserver:self name:kNotificationCardIncorrectDate object:nil];
-//        [[NSNotificationCenter defaultCenter] removeObserver:self name:kNotificationCardInvalid object:nil];
-    }
-
     public func activate() {
         self.cardNumberTextField.delegate = self
         self.cardholderTextField.delegate = self
@@ -62,73 +41,72 @@ public class RTCreditCardInput: NSObject {
         self.expirationDateFormatter = CHRTextFieldFormatter(textField: self.cardExpirationDateTextField, mask: CardDateFormatterMask())
     }
     
-    func setCardNumber(cardNumber: String) {
+    private func setCardNumber(cardNumber: String) {
         self.cardNumberTextField.text = self.cardNumberFormatter.maskedString(from: cardNumber)
     }
     
-    func setExpirationDate(expirationDate: String) {
+    private func setExpirationDate(expirationDate: String) {
         self.cardExpirationDateTextField.text = self.expirationDateFormatter.maskedString(from: expirationDate)
     }
     
-    func setCvv(cvv: String) {
+    private func setCvv(cvv: String) {
         self.cardCVVTextField.text = self.cardCVVFormatter.maskedString(from: cvv)
     }
     
-    func getOwnerError() -> String {
-        guard let text = self.cardholderTextField.text else { return "" }
+    private func getOwnerError() -> RTCreditCardError? {
+        guard let text = self.cardholderTextField.text else { return nil }
         if text.count > 0 {
-            return ""
+            return nil
         } else {
-            return RTCreditCardInput.kNotificationCardIncorrectCardholder
+            return RTCreditCardError.kNotificationCardIncorrectCardholder
         }
     }
     
-    func getCVVError() -> String {
-        guard let text = self.cardCVVTextField.text else { return "" }
+    private func getCVVError() -> RTCreditCardError? {
+        guard let text = self.cardCVVTextField.text else { return nil }
         if text.count == 3 {
-            return ""
+            return nil
         } else {
-            return RTCreditCardInput.kNotificationCardIncorrectCVV
+            return RTCreditCardError.kNotificationCardIncorrectCVV
         }
     }
     
-    func processValidation(shouldChangeResponder: Bool) {
+    private func processValidation(shouldChangeResponder: Bool) {
 
         // #todo : deal with ! near 'text'
-        let cardNumberError = self.cardValidationService.getCardNumberError(cardNumberString: self.cardNumberFormatter.unmaskedString(from: self.cardNumberTextField.text!))
-        if !cardNumberError.isEmpty {
-            // #todo
-            //[NotificationManager postNotificationThreadSafe:cardNumberError withUserInfo:nil];
+        let cardNumberError = self.cardValidation.getCardNumberError(cardNumberString: self.cardNumberFormatter.unmaskedString(from: self.cardNumberTextField.text!))
+        if cardNumberError != nil {
+            self.onCardIncorrectNumber()
+            self.cardCheckDelegate.onError(error: RTCreditCardError.kNotificationCardIncorrectNumber)
             return
         } else if shouldChangeResponder && self.cardNumberTextField.isFirstResponder {
             self.cardholderTextField.becomeFirstResponder()
         }
         let ownerError = self.getOwnerError()
-        if !ownerError.isEmpty {
-            // #todo
-            //[NotificationManager postNotificationThreadSafe:ownerError withUserInfo:nil];
+        if ownerError != nil {
+            self.onCardIncorrectOwner()
+            self.cardCheckDelegate.onError(error: RTCreditCardError.kNotificationCardIncorrectCardholder)
             return
         }
         
         // #todo : deal with ! near 'text'
-        let expirationDateError = self.cardValidationService.getExpirationDateError(cardExpirationDateString: self.expirationDateFormatter.unmaskedString(from: self.cardExpirationDateTextField.text!))
-        if !expirationDateError.isEmpty {
-            // #todo
-            // [NotificationManager postNotificationThreadSafe:expirationDateError withUserInfo:nil]
+        let expirationDateError = self.cardValidation.getExpirationDateError(cardExpirationDateString: self.expirationDateFormatter.unmaskedString(from: self.cardExpirationDateTextField.text!))
+        if expirationDateError != nil {
+            self.onCardIncorrectDate()
+            self.cardCheckDelegate.onError(error: RTCreditCardError.kNotificationCardIncorrectDate)
             return
         } else if shouldChangeResponder && self.cardExpirationDateTextField.isFirstResponder {
             self.cardCVVTextField.becomeFirstResponder()
         }
         let cvvError = self.getCVVError()
-        if !cvvError.isEmpty {
-            // #todo
-            //[NotificationManager postNotificationThreadSafe:cvvError withUserInfo:nil];
+        if cvvError != nil {
+            self.onCardIncorrectCVV()
+            self.cardCheckDelegate.onError(error: RTCreditCardError.kNotificationCardIncorrectCVV)
             return
         } else if shouldChangeResponder && self.cardCVVTextField.isFirstResponder {
             self.cardCVVTextField.resignFirstResponder()
         }
-        // #todo
-        //[NotificationManager postNotificationThreadSafe:kNotificationCardFormValid withUserInfo:nil];
+        self.cardCheckDelegate.onSuccess()
     }
     
     fileprivate func processValidationAsync(shouldChangeResponder: Bool) {
@@ -136,7 +114,7 @@ public class RTCreditCardInput: NSObject {
     }
     
     
-    func createCardInfo() -> CardInfo {
+    private func createCardInfo() -> CardInfo {
         let cardInfo = CardInfo(number: self.cardNumberFormatter.unmaskedString(from: self.cardNumberTextField.text ?? ""),
                                 holder: self.cardholderTextField.text ?? "",
                                 expirationDate: self.expirationDateFormatter.unmaskedString(from: self.cardExpirationDateTextField.text ?? ""),
@@ -144,47 +122,30 @@ public class RTCreditCardInput: NSObject {
         return cardInfo
     }
     
-    func decorateTextField(textField: UITextField) {
-        textField.layer.cornerRadius = 4.0
-        textField.layer.masksToBounds = true
-        textField.layer.borderColor = UIColor(red: 217/255.0, green:188/255.0, blue:233/255.0, alpha:1.0).cgColor
-        textField.layer.borderWidth = 4.0
-    }
     
-    func decorateErrorTextField(textField: UITextField) {
-        textField.layer.cornerRadius = 4.0
-        textField.layer.masksToBounds = true
-        textField.layer.borderColor = UIColor(red :255/255.0, green:0/255.0, blue:0/255.0, alpha:1.0).cgColor
-        textField.layer.borderWidth = 4.0
-    }
     
-    func undecorateTextField(textField: UITextField) {
-        textField.layer.borderColor = UIColor.clear.cgColor
-    }
-    
-    func onCardIncorrectNumber(notification: Notification) {
-        
+    private func onCardIncorrectNumber() {
         if self.cardNumberTextField.isFirstResponder {
             return
         }
-        self.decorateErrorTextField(textField: self.cardNumberTextField)
+        self.cardValidationDecorator.decorateErrorTextField(textField: self.cardNumberTextField)
     }
     
-    func onCardIncorrectOwner(notification: Notification) {
+    private func onCardIncorrectOwner() {
         if self.cardholderTextField.isFirstResponder {
             return
         }
-        self.decorateErrorTextField(textField: self.cardholderTextField)
+        self.cardValidationDecorator.decorateErrorTextField(textField: self.cardholderTextField)
     }
     
-    func onCardIncorrectCVV(notification: Notification) {
+    private func onCardIncorrectCVV() {
         if self.cardCVVTextField.isFirstResponder {
             return
         }
-        self.decorateErrorTextField(textField: self.cardCVVTextField)
+        self.cardValidationDecorator.decorateErrorTextField(textField: self.cardCVVTextField)
     }
     
-    func onCardIncorrectDate(notification: Notification) {
+    private func onCardIncorrectDate() {
         guard let text = self.cardExpirationDateTextField.text else {
             return
         }
@@ -193,7 +154,7 @@ public class RTCreditCardInput: NSObject {
                 text.count == 0) {
             return
         }
-        self.decorateErrorTextField(textField: self.cardExpirationDateTextField)
+        self.cardValidationDecorator.decorateErrorTextField(textField: self.cardExpirationDateTextField)
     }
 }
 
@@ -212,21 +173,21 @@ extension RTCreditCardInput: UITextFieldDelegate {
     }
     
     public func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
-        self.decorateTextField(textField: textField)
+        self.cardValidationDecorator.decorateTextField(textField: textField)
         self.processValidationAsync(shouldChangeResponder: false)
         return true
     }
     
     public func textFieldShouldEndEditing(_ textField: UITextField) -> Bool {
-        self.undecorateTextField(textField: textField)
+        self.cardValidationDecorator.undecorateTextField(textField: textField)
         self.processValidationAsync(shouldChangeResponder: false)
         return true
     }
     
     public func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         if textField.isEqual(self.cardNumberTextField) {
-            let cardNumberError = self.cardValidationService.getCardNumberError(cardNumberString: self.cardNumberFormatter.unmaskedString(from: self.cardNumberTextField.text ?? ""))
-            if !cardNumberError.isEmpty {
+            let cardNumberError = self.cardValidation.getCardNumberError(cardNumberString: self.cardNumberFormatter.unmaskedString(from: self.cardNumberTextField.text ?? ""))
+            if cardNumberError != nil {
                 textField.becomeFirstResponder()
                 return false
             } else {
@@ -235,7 +196,7 @@ extension RTCreditCardInput: UITextFieldDelegate {
             }
         } else if textField.isEqual(self.cardholderTextField) {
             let ownerError = self.getOwnerError()
-            if !ownerError.isEmpty {
+            if ownerError != nil {
                 textField.becomeFirstResponder()
                 return false
             } else {
@@ -243,8 +204,8 @@ extension RTCreditCardInput: UITextFieldDelegate {
                 return true
             }
         } else if textField.isEqual(self.cardExpirationDateTextField) {
-            let expirationDateError = self.cardValidationService.getExpirationDateError(cardExpirationDateString: self.expirationDateFormatter.unmaskedString(from: self.cardExpirationDateTextField.text ?? ""))
-            if !expirationDateError.isEmpty {
+            let expirationDateError = self.cardValidation.getExpirationDateError(cardExpirationDateString: self.expirationDateFormatter.unmaskedString(from: self.cardExpirationDateTextField.text ?? ""))
+            if expirationDateError != nil {
                 textField.becomeFirstResponder()
                 return false
             } else {
@@ -253,7 +214,7 @@ extension RTCreditCardInput: UITextFieldDelegate {
             }
         } else if textField.isEqual(self.cardCVVTextField) {
             let cvvError = self.getCVVError()
-            if !cvvError.isEmpty {
+            if cvvError != nil {
                 textField.becomeFirstResponder()
                 return false
             } else {
