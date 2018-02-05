@@ -9,7 +9,7 @@
 import UIKit
 import CHRTextFieldFormatter
 
-public class RTCreditCardInput: NSObject {
+public class RTCreditCardInput/*: NSObject*/ {
     var cardNumberFormatter: CHRTextFieldFormatter!
     var cardCVVFormatter: CHRTextFieldFormatter!
     var expirationDateFormatter: CHRTextFieldFormatter!
@@ -112,7 +112,6 @@ public class RTCreditCardInput: NSObject {
     fileprivate func processValidationAsync(shouldChangeResponder: Bool) {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1, execute: { self.processValidation(shouldChangeResponder: shouldChangeResponder) })
     }
-    
     
     private func createCardInfo() -> CardInfo {
         let cardInfo = CardInfo(number: self.cardNumberFormatter.unmaskedString(from: self.cardNumberTextField.text ?? ""),

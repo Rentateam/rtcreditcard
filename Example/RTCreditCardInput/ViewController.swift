@@ -9,7 +9,7 @@
 import UIKit
 import RTCreditCardInput
 
-class ViewController: UIViewController {
+class ViewController: UIViewController, CardCheckDelegateProtocol, CartNumberValidationProtocol {
     
     @IBOutlet weak var tfCardnumber: UITextField!
     @IBOutlet weak var tfCardholder: UITextField!
@@ -21,7 +21,9 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        self.input = RTCreditCardInput(cardValidationService: CardDefaultValidationService())
+        self.input = RTCreditCardInput(cardValidation: CardDefaultValidationService(numberValidation: self),
+                                       cardValidationDecorator: CardValidationDefaultDecoratorService(),
+                                       cardCheckDelegate: self)
         self.input.cardCVVTextField = self.tfCvv
         self.input.cardExpirationDateTextField = self.tfDate
         self.input.cardholderTextField = self.tfCardholder
@@ -29,5 +31,17 @@ class ViewController: UIViewController {
         self.input.activate()
     }
     
+    func onSuccess(){
+        print("Successful validation")
+    }
+    
+    func onError(error: RTCreditCardError) {
+        print("Validation error: %@", error)
+    }
+    
+    func isCardNumberValid(_ cardNumber: String) -> Bool {
+        //just primitive realization
+        return cardNumber.count == 16
+    }
 }
 

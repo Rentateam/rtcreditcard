@@ -8,6 +8,10 @@
 import Foundation
 
 public class CardValidationDefaultDecoratorService: CardValidationDecoratorProtocol {
+    public init() {
+        
+    }
+    
     public func decorateTextField(textField: UITextField) {
         textField.layer.cornerRadius = 4.0
         textField.layer.masksToBounds = true

@@ -17,11 +17,11 @@ class CardNumberFormatterMask: CHRCardNumberMask {
     
     override func formattedString(from string: String, cursorPosition: UnsafeMutablePointer<UInt>?) -> String {
         var stringWithAddedSpaces = ""
-        let cursorPositionInSpacelessString = cursorPosition == nil ? 0 : cursorPosition?.pointee
+        let cursorPositionInSpacelessString = cursorPosition?.pointee ?? 0
         for i in 0..<string.count {
             if (i > 0) && ((i % 4) == 0) {
                 stringWithAddedSpaces.append(" ")
-                if i < cursorPositionInSpacelessString {
+                if UInt(bitPattern: i) < cursorPositionInSpacelessString {
                     if cursorPosition != nil {
                         cursorPosition?.pointee += 1
                     }

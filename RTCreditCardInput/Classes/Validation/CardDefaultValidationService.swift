@@ -11,7 +11,7 @@ public class CardDefaultValidationService: CardValidationProtocol {
     
     private var numberValidation: CartNumberValidationProtocol
     
-    init(numberValidation: CartNumberValidationProtocol) {
+    public init(numberValidation: CartNumberValidationProtocol) {
         self.numberValidation = numberValidation
     }
     
