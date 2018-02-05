@@ -10,18 +10,18 @@ import UIKit
 import CHRTextFieldFormatter
 
 public class RTCreditCardInput: NSObject {
-    private var cardNumberFormatter: CHRTextFieldFormatter!
-    private var cardCVVFormatter: CHRTextFieldFormatter!
-    private var expirationDateFormatter: CHRTextFieldFormatter!
+    fileprivate var cardNumberFormatter: CHRTextFieldFormatter!
+    fileprivate var cardCVVFormatter: CHRTextFieldFormatter!
+    fileprivate var expirationDateFormatter: CHRTextFieldFormatter!
     
-    private weak var cardNumberTextField: UITextField?
-    private weak var cardholderTextField: UITextField?
-    private weak var cardExpirationDateTextField: UITextField?
-    private weak var cardCVVTextField: UITextField?
-    private var cardValidation: CardValidationProtocol
-    private var cardValidationDecorator: CardValidationDecoratorProtocol
-    private var cardCheckDelegate: CardCheckDelegateProtocol
-    private var lastSentError: RTCreditCardError?
+    fileprivate weak var cardNumberTextField: UITextField?
+    fileprivate weak var cardholderTextField: UITextField?
+    fileprivate weak var cardExpirationDateTextField: UITextField?
+    fileprivate weak var cardCVVTextField: UITextField?
+    fileprivate var cardValidation: CardValidationProtocol
+    fileprivate var cardValidationDecorator: CardValidationDecoratorProtocol
+    fileprivate var cardCheckDelegate: CardCheckDelegateProtocol
+    fileprivate var lastSentError: RTCreditCardError?
     
     public init(cardValidation: CardValidationProtocol, cardValidationDecorator: CardValidationDecoratorProtocol, cardCheckDelegate: CardCheckDelegateProtocol) {
         self.cardValidation = cardValidation
