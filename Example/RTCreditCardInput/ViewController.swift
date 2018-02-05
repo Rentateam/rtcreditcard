@@ -24,11 +24,10 @@ class ViewController: UIViewController, CardCheckDelegateProtocol, CartNumberVal
         self.input = RTCreditCardInput(cardValidation: CardDefaultValidationService(numberValidation: self),
                                        cardValidationDecorator: CardValidationDefaultDecoratorService(),
                                        cardCheckDelegate: self)
-        self.input.cardCVVTextField = self.tfCvv
-        self.input.cardExpirationDateTextField = self.tfDate
-        self.input.cardholderTextField = self.tfCardholder
-        self.input.cardNumberTextField = self.tfCardnumber
-        self.input.activate()
+        self.input.assignTextFields(cardNumberTextField: self.tfCardnumber,
+                                    cardholderTextField: self.tfCardholder,
+                                    cardExpirationDateTextField: self.tfDate,
+                                    cardCVVTextField: self.tfCvv)
     }
     
     func onSuccess(){

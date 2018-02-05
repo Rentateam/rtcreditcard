@@ -53,23 +53,25 @@ public class CardDefaultValidationService: CardValidationProtocol {
     }
     
     public func getCardNumberError(cardNumberString: String) -> RTCreditCardError? {
-        return self.getCardNumberError(cardNumberString: cardNumberString, shouldBeValidNumber: true)
-    }
-    
-    private func getCardNumberError(cardNumberString: String, shouldBeValidNumber: Bool) -> RTCreditCardError? {
-        // supposed to be implementation of card number validation here
-        //        if shouldBeValidNumber && ![CPService isCardNumberValid:cardNumberString]){
-        //            return kNotificationCardIncorrectNumber;
-        //        }
-        //        if cardNumberString.count == 16 {
-            //        return nil
-            //    } else {
-            //    return RTCreditCardError.kNotificationCardIncorrectNumber
-            //    }
-        
-        if shouldBeValidNumber && !self.numberValidation.isCardNumberValid(cardNumberString) {
+        if !self.numberValidation.isCardNumberValid(cardNumberString) {
             return RTCreditCardError.kNotificationCardIncorrectNumber
         }
         return nil
+    }
+    
+    public func getCardHolderError(cardHolderString: String) -> RTCreditCardError? {
+        if cardHolderString.count > 0 {
+            return nil
+        } else {
+            return RTCreditCardError.kNotificationCardIncorrectCardholder
+        }
+    }
+    
+    public func getCVVError(cvvString: String) -> RTCreditCardError? {
+        if cvvString.count == 3 {
+            return nil
+        } else {
+            return RTCreditCardError.kNotificationCardIncorrectCVV
+        }
     }
 }

@@ -11,5 +11,6 @@ import Foundation
 public protocol CardValidationProtocol {
     func getExpirationDateError(cardExpirationDateString: String) -> RTCreditCardError?
     func getCardNumberError(cardNumberString: String) -> RTCreditCardError?
-//    func getCardNumberError(cardNumberString: String, shouldBeValidNumber: Bool) -> String?
+    func getCardHolderError(cardHolderString: String) -> RTCreditCardError?
+    func getCVVError(cvvString: String) -> RTCreditCardError?
 }
