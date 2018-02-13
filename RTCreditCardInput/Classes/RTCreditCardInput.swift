@@ -10,18 +10,23 @@ import UIKit
 import CHRTextFieldFormatter
 
 public class RTCreditCardInput: NSObject {
-    private var cardNumberFormatter: CHRTextFieldFormatter!
-    private var cardCVVFormatter: CHRTextFieldFormatter!
-    private var expirationDateFormatter: CHRTextFieldFormatter!
+    fileprivate var cardNumberFormatter: CHRTextFieldFormatter!
+    fileprivate var cardCVVFormatter: CHRTextFieldFormatter!
+    fileprivate var expirationDateFormatter: CHRTextFieldFormatter!
     
-    private weak var cardNumberTextField: UITextField?
-    private weak var cardholderTextField: UITextField?
-    private weak var cardExpirationDateTextField: UITextField?
-    private weak var cardCVVTextField: UITextField?
-    private var cardValidation: CardValidationProtocol
-    private var cardValidationDecorator: CardValidationDecoratorProtocol
-    private var cardCheckDelegate: CardCheckDelegateProtocol
-    private var lastSentError: RTCreditCardError?
+    fileprivate weak var cardNumberTextField: UITextField?
+    fileprivate weak var cardholderTextField: UITextField?
+    fileprivate weak var cardExpirationDateTextField: UITextField?
+    fileprivate weak var cardCVVTextField: UITextField?
+    fileprivate var cardNumberOuterDelegate: UITextFieldDelegate?
+    fileprivate var cardHolderOuterDelegate: UITextFieldDelegate?
+    fileprivate var cardExpirationDateOuterDelegate: UITextFieldDelegate?
+    fileprivate var cardCvvOuterDelegate: UITextFieldDelegate?
+    fileprivate var cardValidation: CardValidationProtocol
+    fileprivate var cardValidationDecorator: CardValidationDecoratorProtocol
+    fileprivate var cardCheckDelegate: CardCheckDelegateProtocol
+    fileprivate var lastSentError: RTCreditCardError?
+    private var validationWorkItem: DispatchWorkItem?
     
     public init(cardValidation: CardValidationProtocol, cardValidationDecorator: CardValidationDecoratorProtocol, cardCheckDelegate: CardCheckDelegateProtocol) {
         self.cardValidation = cardValidation
@@ -40,7 +45,37 @@ public class RTCreditCardInput: NSObject {
         self.activate()
     }
     
+    public func getCardNumber() -> String? {
+        if let cardText = self.cardNumberTextField?.text {
+            return self.cardNumberFormatter.unmaskedString(from: cardText)
+        } else {
+            return nil
+        }
+    }
+    
+    public func getCardOwner() -> String? {
+        return self.cardholderTextField?.text
+    }
+    
+    public func getExpirationDate() -> String? {
+        if let dateText = self.cardExpirationDateTextField?.text {
+            return self.expirationDateFormatter.unmaskedString(from: dateText)
+        } else {
+            return nil
+        }
+    }
+    
+    public func getCVV() -> String? {
+        return self.cardCVVTextField?.text
+    }
+    
     private func activate() {
+        //Store outer delegates to emit their methods
+        self.cardNumberOuterDelegate = self.cardNumberTextField?.delegate
+        self.cardHolderOuterDelegate = self.cardholderTextField?.delegate
+        self.cardExpirationDateOuterDelegate = self.cardExpirationDateTextField?.delegate
+        self.cardCvvOuterDelegate = self.cardCVVTextField?.delegate
+        
         self.cardNumberTextField?.delegate = self
         self.cardholderTextField?.delegate = self
         self.cardExpirationDateTextField?.delegate = self
@@ -110,8 +145,6 @@ public class RTCreditCardInput: NSObject {
         self.sendError(nil)
     }
     
-    private var validationWorkItem: DispatchWorkItem?
-    
     fileprivate func processValidationAsync(shouldChangeResponder: Bool) {
         self.validationWorkItem?.cancel()
         self.validationWorkItem = DispatchWorkItem() {
@@ -175,6 +208,20 @@ public class RTCreditCardInput: NSObject {
 }
 
 extension RTCreditCardInput: UITextFieldDelegate {
+    
+    private func getOuterDelegate(for textField: UITextField) -> UITextFieldDelegate? {
+        if textField.isEqual(self.cardNumberTextField) {
+            return self.cardNumberOuterDelegate
+        } else if textField.isEqual(self.cardholderTextField) {
+            return self.cardHolderOuterDelegate
+        } else if textField.isEqual(self.cardExpirationDateTextField) {
+            return self.cardExpirationDateOuterDelegate
+        } else if textField.isEqual(self.cardCVVTextField) {
+            return self.cardCvvOuterDelegate
+        }
+        return nil
+    }
+    
     public func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
         self.processValidationAsync(shouldChangeResponder: true)
         var shouldChange = true
@@ -185,61 +232,80 @@ extension RTCreditCardInput: UITextFieldDelegate {
         } else if (textField == self.cardCVVTextField){
             shouldChange = self.cardCVVFormatter.textField(textField, shouldChangeCharactersIn: range, replacementString:string)
         }
-        return shouldChange;
+        if let delegateMethod = self.getOuterDelegate(for: textField)?.textField {
+            return shouldChange && delegateMethod(textField, range, string)
+        } else {
+            return shouldChange
+        }
     }
     
     public func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
         self.cardValidationDecorator.decorateTextField(textField: textField)
         self.processValidationAsync(shouldChangeResponder: false)
-        return true
+        if let textFieldShouldBeginEditing = self.getOuterDelegate(for: textField)?.textFieldShouldBeginEditing {
+            return textFieldShouldBeginEditing(textField)
+        } else {
+            return true
+        }
     }
     
     public func textFieldShouldEndEditing(_ textField: UITextField) -> Bool {
         self.cardValidationDecorator.undecorateTextField(textField: textField)
         self.processValidationAsync(shouldChangeResponder: false)
-        return true
+        if let textFieldShouldEndEditing = self.getOuterDelegate(for: textField)?.textFieldShouldEndEditing {
+            return textFieldShouldEndEditing(textField)
+        } else {
+            return true
+        }
     }
     
     public func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        var returnResult: Bool
         if textField.isEqual(self.cardNumberTextField) {
             let cardNumberError = self.cardValidation.getCardNumberError(cardNumberString: self.cardNumberFormatter.unmaskedString(from: self.cardNumberTextField?.text ?? ""))
             if cardNumberError != nil {
                 textField.becomeFirstResponder()
-                return false
+                returnResult = false
             } else {
                 self.cardholderTextField?.becomeFirstResponder()
-                return true
+                returnResult = true
             }
         } else if textField.isEqual(self.cardholderTextField) {
             let ownerError = self.cardValidation.getCardHolderError(cardHolderString: self.cardholderTextField?.text ?? "")
             if ownerError != nil {
                 textField.becomeFirstResponder()
-                return false
+                returnResult = false
             } else {
                 self.cardExpirationDateTextField?.becomeFirstResponder()
-                return true
+                returnResult = true
             }
         } else if textField.isEqual(self.cardExpirationDateTextField) {
             let expirationDateError = self.cardValidation.getExpirationDateError(cardExpirationDateString: self.expirationDateFormatter.unmaskedString(from: self.cardExpirationDateTextField?.text ?? ""))
             if expirationDateError != nil {
                 textField.becomeFirstResponder()
-                return false
+                returnResult = false
             } else {
                 self.cardCVVTextField?.becomeFirstResponder()
-                return true
+                returnResult = true
             }
         } else if textField.isEqual(self.cardCVVTextField) {
             let cvvError = self.cardValidation.getCVVError(cvvString: self.cardCVVTextField?.text ?? "")
             if cvvError != nil {
                 textField.becomeFirstResponder()
-                return false
+                returnResult = false
             } else {
                 self.cardCVVTextField?.resignFirstResponder()
-                return true
+                returnResult = true
             }
+        } else {
+            returnResult = true
         }
         
         textField.resignFirstResponder()
-        return true
+        if let textFieldShouldReturn = self.getOuterDelegate(for: textField)?.textFieldShouldReturn {
+            return returnResult && textFieldShouldReturn(textField)
+        } else {
+            return returnResult
+        }
     }
 }

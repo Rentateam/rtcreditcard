@@ -23,10 +23,11 @@ You can provide your own validation and error decoration logic.
 See the embedded example in example folder.
                        DESC
 
-  s.homepage         = 'git@bitbucket.org:rentateam/rtcreditcard.git'
+  s.homepage         = 'https://bitbucket.org/rentateam/rtcreditcard'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
   s.author           = { 'RentaTeam' => 'info@rentateam.ru' }
   s.source           = { :git => 'https://bitbucket.org/rentateam/rtcreditcard.git', :tag => s.version.to_s }
+  s.pod_target_xcconfig = { 'SWIFT_VERSION' => '4.0' }
 
   s.ios.deployment_target = '9.0'
 
