@@ -9,7 +9,7 @@
 import UIKit
 import RTCreditCardInput
 
-class ViewController: UIViewController, CardCheckDelegateProtocol, CartNumberValidationProtocol {
+class ViewController: UIViewController, CardCheckDelegateProtocol, CartNumberValidationProtocol, UITextFieldDelegate {
     
     @IBOutlet weak var tfCardnumber: UITextField!
     @IBOutlet weak var tfCardholder: UITextField!
@@ -24,14 +24,25 @@ class ViewController: UIViewController, CardCheckDelegateProtocol, CartNumberVal
         self.input = RTCreditCardInput(cardValidation: CardDefaultValidationService(numberValidation: self),
                                        cardValidationDecorator: CardValidationDefaultDecoratorService(),
                                        cardCheckDelegate: self)
+        self.tfCardnumber.delegate = self
+        self.tfCardholder.delegate = self
+        self.tfDate.delegate = self
+        self.tfCvv.delegate = self
+        
         self.input.assignTextFields(cardNumberTextField: self.tfCardnumber,
                                     cardholderTextField: self.tfCardholder,
                                     cardExpirationDateTextField: self.tfDate,
                                     cardCVVTextField: self.tfCvv)
+        
+        
     }
     
     func onSuccess(){
-        print("Successful validation")
+        print("Successful validation, %@, %@, %@, %@",
+              self.input.getCardNumber() as Any,
+              self.input.getCardOwner() as Any,
+              self.input.getExpirationDate() as Any,
+              self.input.getCVV() as Any)
     }
     
     func onError(error: RTCreditCardError) {
@@ -41,6 +52,23 @@ class ViewController: UIViewController, CardCheckDelegateProtocol, CartNumberVal
     func isCardNumberValid(_ cardNumber: String) -> Bool {
         //just primitive realization
         return cardNumber.count == 16
+    }
+    
+    //Allows to have own textfield delegates
+    public func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        return true
+    }
+
+    public func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
+        return true
+    }
+
+    public func textFieldShouldEndEditing(_ textField: UITextField) -> Bool {
+        return true
+    }
+
+    public func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        return true
     }
 }
 
