@@ -32,5 +32,14 @@ See the embedded example in example folder.
   s.ios.deployment_target = '9.0'
 
   s.source_files = 'RTCreditCardInput/Classes/**/*'
-  s.dependency 'CHRTextFieldFormatter', '~> 1.0.1'
+  s.dependency 'CHRTextFieldFormatter', '1.0.1'
+  s.dependency 'CardIO', '5.4.1'
+  s.vendored_libraries = 'CardIO/libCardIO.a', 'CardIO/libopencv_core.a', 'CardIO/libopencv_imgproc.a'
+  #s.libraries = 'CardIO', 'opencv_core', 'opencv_imgproc'
+  
+  #s.prepare_command = "./build-cardio-deps.sh\n./create-cardio-framework.sh\n"
+  #s.prepare_command = "./create-cardio-framework.sh dynamic 9.0\n"
+  #s.ios.vendored_frameworks = "CardIO.framework"
 end
+
+

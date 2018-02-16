@@ -15,6 +15,7 @@
 		607FACEC1AFB9204008FA782 /* Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACEB1AFB9204008FA782 /* Tests.swift */; };
 		9A142F8F24A721777BCDDFFD /* Pods_RTCreditCardInput_Tests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5CD428967AC6B5F29E8D9034 /* Pods_RTCreditCardInput_Tests.framework */; };
 		DF9AA027978392A483558D23 /* Pods_RTCreditCardInput_Example.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B91B7FD20BA33FA766509F2 /* Pods_RTCreditCardInput_Example.framework */; };
+		EBD7E7D32036E22900E20523 /* create-cardio-framework.sh in Resources */ = {isa = PBXBuildFile; fileRef = EBD7E7D22036E22900E20523 /* create-cardio-framework.sh */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -46,6 +47,11 @@
 		9B91B7FD20BA33FA766509F2 /* Pods_RTCreditCardInput_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_RTCreditCardInput_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		A8E21CDD73D27199BB48634F /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
 		B6AC4DCAAE691784FC43E85C /* RTCreditCardInput.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = RTCreditCardInput.podspec; path = ../RTCreditCardInput.podspec; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
+		EBD7E7D22036E22900E20523 /* create-cardio-framework.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; name = "create-cardio-framework.sh"; path = "../create-cardio-framework.sh"; sourceTree = "<group>"; };
+		EBD7E7D42036E26A00E20523 /* build-cardio-deps.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; name = "build-cardio-deps.sh"; path = "../build-cardio-deps.sh"; sourceTree = "<group>"; };
+		EBD7E7D52036E53700E20523 /* libopencv_imgproc.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libopencv_imgproc.a; path = Pods/CardIO/CardIO/libopencv_imgproc.a; sourceTree = "<group>"; };
+		EBD7E7D62036E53700E20523 /* libCardIO.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libCardIO.a; path = Pods/CardIO/CardIO/libCardIO.a; sourceTree = "<group>"; };
+		EBD7E7D72036E53800E20523 /* libopencv_core.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libopencv_core.a; path = Pods/CardIO/CardIO/libopencv_core.a; sourceTree = "<group>"; };
 		F518CF19A49F78F3AC9EFC5C /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -143,6 +149,8 @@
 		607FACF51AFB993E008FA782 /* Podspec Metadata */ = {
 			isa = PBXGroup;
 			children = (
+				EBD7E7D22036E22900E20523 /* create-cardio-framework.sh */,
+				EBD7E7D42036E26A00E20523 /* build-cardio-deps.sh */,
 				B6AC4DCAAE691784FC43E85C /* RTCreditCardInput.podspec */,
 				F518CF19A49F78F3AC9EFC5C /* README.md */,
 				A8E21CDD73D27199BB48634F /* LICENSE */,
@@ -153,6 +161,9 @@
 		A76FBB620795AD8C0870ECA8 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				EBD7E7D62036E53700E20523 /* libCardIO.a */,
+				EBD7E7D72036E53800E20523 /* libopencv_core.a */,
+				EBD7E7D52036E53700E20523 /* libopencv_imgproc.a */,
 				9B91B7FD20BA33FA766509F2 /* Pods_RTCreditCardInput_Example.framework */,
 				5CD428967AC6B5F29E8D9034 /* Pods_RTCreditCardInput_Tests.framework */,
 			);
@@ -249,6 +260,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				607FACDB1AFB9204008FA782 /* Main.storyboard in Resources */,
+				EBD7E7D32036E22900E20523 /* create-cardio-framework.sh in Resources */,
 				607FACE01AFB9204008FA782 /* LaunchScreen.xib in Resources */,
 				607FACDD1AFB9204008FA782 /* Images.xcassets in Resources */,
 			);
@@ -521,6 +533,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = RTCreditCardInput/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Pods/CardIO/CardIO",
+				);
 				MODULE_NAME = ExampleApp;
 				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.demo.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -536,6 +552,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = RTCreditCardInput/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Pods/CardIO/CardIO",
+				);
 				MODULE_NAME = ExampleApp;
 				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.demo.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
