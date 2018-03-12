@@ -25,7 +25,6 @@ public class RTCreditCardInput: NSObject {
     fileprivate var cardValidation: CardValidationProtocol
     fileprivate var cardValidationDecorator: CardValidationDecoratorProtocol
     fileprivate var cardCheckDelegate: CardCheckDelegateProtocol
-    fileprivate var lastSentError: RTCreditCardError?
     private var validationWorkItem: DispatchWorkItem?
     
     public init(cardValidation: CardValidationProtocol, cardValidationDecorator: CardValidationDecoratorProtocol, cardCheckDelegate: CardCheckDelegateProtocol) {
@@ -99,10 +98,6 @@ public class RTCreditCardInput: NSObject {
     }
     
     private func sendError(_ error: RTCreditCardError?) {
-        if self.lastSentError == error {
-            return
-        }
-        self.lastSentError = error
         if error != nil {
             self.cardCheckDelegate.onError(error: error!)
         } else {
