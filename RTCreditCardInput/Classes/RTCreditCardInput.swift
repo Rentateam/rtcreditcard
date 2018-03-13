@@ -112,13 +112,19 @@ public class RTCreditCardInput: NSObject {
             self.sendError(RTCreditCardError.kNotificationCardIncorrectNumber)
             return
         } else if shouldChangeResponder && (self.cardNumberTextField?.isFirstResponder ?? false) {
-            self.cardholderTextField?.becomeFirstResponder()
+            if self.cardholderTextField != nil {
+                self.cardholderTextField?.becomeFirstResponder()
+            } else {
+                self.cardExpirationDateTextField?.becomeFirstResponder()
+            }
         }
-        let ownerError = self.cardValidation.getCardHolderError(cardHolderString: self.cardholderTextField?.text ?? "")
-        if ownerError != nil {
-            self.onCardIncorrectOwner()
-            self.sendError(RTCreditCardError.kNotificationCardIncorrectCardholder)
-            return
+        if self.cardholderTextField != nil {
+            let ownerError = self.cardValidation.getCardHolderError(cardHolderString: self.cardholderTextField?.text ?? "")
+            if ownerError != nil {
+                self.onCardIncorrectOwner()
+                self.sendError(RTCreditCardError.kNotificationCardIncorrectCardholder)
+                return
+            }
         }
         
         let expirationDateError = self.cardValidation.getExpirationDateError(cardExpirationDateString: self.expirationDateFormatter.unmaskedString(from: (self.cardExpirationDateTextField?.text ?? "")))
@@ -262,7 +268,11 @@ extension RTCreditCardInput: UITextFieldDelegate {
                 textField.becomeFirstResponder()
                 returnResult = false
             } else {
-                self.cardholderTextField?.becomeFirstResponder()
+                if self.cardholderTextField != nil {
+                    self.cardholderTextField?.becomeFirstResponder()
+                } else {
+                    self.cardExpirationDateTextField?.becomeFirstResponder()
+                }
                 returnResult = true
             }
         } else if textField.isEqual(self.cardholderTextField) {
@@ -304,3 +314,4 @@ extension RTCreditCardInput: UITextFieldDelegate {
         }
     }
 }
+
