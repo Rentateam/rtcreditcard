@@ -17,7 +17,7 @@ public class CardDefaultValidationService: CardValidationProtocol {
     
     public func getExpirationDateError(cardExpirationDateString: String) -> RTCreditCardError? {
         if cardExpirationDateString.count < 5 {
-             return RTCreditCardError.kNotificationCardIncorrectDate
+            return .incorrectDate
         }
         let dateComponents = cardExpirationDateString.split(separator: "/")
         if dateComponents.count == 2 {
@@ -30,23 +30,31 @@ public class CardDefaultValidationService: CardValidationProtocol {
             let currentYear = Int(String(yearString[index...]))!
             
             guard let inputedYear = Int(dateComponents[1]) else {
-                return RTCreditCardError.kNotificationCardIncorrectDate
-            }
-            
-            if inputedYear < currentYear {
-                return RTCreditCardError.kNotificationCardIncorrectDate
+                return .incorrectDate
             }
             
             guard let inputedMonth = Int(dateComponents[0]) else {
-                return RTCreditCardError.kNotificationCardIncorrectDate
+                return .incorrectDate
             }
             
             if inputedMonth > 12 {
-                return RTCreditCardError.kNotificationCardIncorrectDate
+                return .incorrectDate
+            }
+            
+            if inputedYear < currentYear {
+                return .cardExpired
             }
             
             if inputedMonth < currentMonth && inputedYear <= currentYear {
-                return RTCreditCardError.kNotificationCardIncorrectDate
+                return .cardExpired
+            }
+            
+            if inputedYear > currentYear + 10 {
+                return .incorrectDate
+            }
+            
+            if inputedMonth > currentMonth && inputedYear >= currentYear + 10 {
+                return .incorrectDate
             }
         }
         return nil
@@ -54,7 +62,7 @@ public class CardDefaultValidationService: CardValidationProtocol {
     
     public func getCardNumberError(cardNumberString: String) -> RTCreditCardError? {
         if !self.numberValidation.isCardNumberValid(cardNumberString) {
-            return RTCreditCardError.kNotificationCardIncorrectNumber
+            return .incorrectNumber
         }
         return nil
     }
@@ -63,15 +71,16 @@ public class CardDefaultValidationService: CardValidationProtocol {
         if cardHolderString.count > 0 {
             return nil
         } else {
-            return RTCreditCardError.kNotificationCardIncorrectCardholder
+            return .incorrectCardholder
         }
     }
     
-    public func getCVVError(cvvString: String) -> RTCreditCardError? {
-        if cvvString.count == 3 {
+    public func getCVVError(cardNumberString:String, cvvString: String) -> RTCreditCardError? {
+        if (cardNumberString.starts(with: "3") && cvvString.count == 4) || (!cardNumberString.starts(with: "3") && cvvString.count == 3) {
             return nil
         } else {
-            return RTCreditCardError.kNotificationCardIncorrectCVV
+            return .incorrectCVV
         }
     }
 }
+

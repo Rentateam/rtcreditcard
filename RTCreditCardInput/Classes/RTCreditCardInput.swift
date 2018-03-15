@@ -79,7 +79,7 @@ public class RTCreditCardInput: NSObject {
         self.cardholderTextField?.delegate = self
         self.cardExpirationDateTextField?.delegate = self
         self.cardCVVTextField?.delegate = self
-    
+        
         self.cardNumberFormatter = CHRTextFieldFormatter(textField: self.cardNumberTextField, mask: CardNumberFormatterMask())
         self.cardCVVFormatter = CHRTextFieldFormatter(textField: self.cardCVVTextField, mask: CvvNumberFormatterMask())
         self.expirationDateFormatter = CHRTextFieldFormatter(textField: self.cardExpirationDateTextField, mask: CardDateFormatterMask())
@@ -109,7 +109,7 @@ public class RTCreditCardInput: NSObject {
         let cardNumberError = self.cardValidation.getCardNumberError(cardNumberString: self.cardNumberFormatter.unmaskedString(from: (self.cardNumberTextField?.text ?? "")))
         if cardNumberError != nil {
             self.onCardIncorrectNumber()
-            self.sendError(RTCreditCardError.kNotificationCardIncorrectNumber)
+            self.sendError(.incorrectNumber)
             return
         } else if shouldChangeResponder && (self.cardNumberTextField?.isFirstResponder ?? false) {
             if self.cardholderTextField != nil {
@@ -122,7 +122,7 @@ public class RTCreditCardInput: NSObject {
             let ownerError = self.cardValidation.getCardHolderError(cardHolderString: self.cardholderTextField?.text ?? "")
             if ownerError != nil {
                 self.onCardIncorrectOwner()
-                self.sendError(RTCreditCardError.kNotificationCardIncorrectCardholder)
+                self.sendError(.incorrectCardholder)
                 return
             }
         }
@@ -130,15 +130,16 @@ public class RTCreditCardInput: NSObject {
         let expirationDateError = self.cardValidation.getExpirationDateError(cardExpirationDateString: self.expirationDateFormatter.unmaskedString(from: (self.cardExpirationDateTextField?.text ?? "")))
         if expirationDateError != nil {
             self.onCardIncorrectDate()
-            self.sendError(RTCreditCardError.kNotificationCardIncorrectDate)
+            self.sendError(expirationDateError)
             return
         } else if shouldChangeResponder && (self.cardExpirationDateTextField?.isFirstResponder ?? false) {
             self.cardCVVTextField?.becomeFirstResponder()
         }
-        let cvvError = self.cardValidation.getCVVError(cvvString: self.cardCVVTextField?.text ?? "")
+        let cvvError = self.cardValidation.getCVVError(cardNumberString: self.cardNumberTextField?.text ?? "",
+                                                       cvvString: self.cardCVVTextField?.text ?? "")
         if cvvError != nil {
             self.onCardIncorrectCVV()
-            self.sendError(RTCreditCardError.kNotificationCardIncorrectCVV)
+            self.sendError(.incorrectCVV)
             return
         } else if shouldChangeResponder && (self.cardCVVTextField?.isFirstResponder ?? false) {
             self.cardCVVTextField?.resignFirstResponder()
@@ -294,7 +295,7 @@ extension RTCreditCardInput: UITextFieldDelegate {
                 returnResult = true
             }
         } else if textField.isEqual(self.cardCVVTextField) {
-            let cvvError = self.cardValidation.getCVVError(cvvString: self.cardCVVTextField?.text ?? "")
+            let cvvError = self.cardValidation.getCVVError(cardNumberString: self.cardNumberTextField?.text ?? "", cvvString: self.cardCVVTextField?.text ?? "")
             if cvvError != nil {
                 textField.becomeFirstResponder()
                 returnResult = false
@@ -314,4 +315,3 @@ extension RTCreditCardInput: UITextFieldDelegate {
         }
     }
 }
-

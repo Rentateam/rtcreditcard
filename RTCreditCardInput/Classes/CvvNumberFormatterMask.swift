@@ -12,7 +12,7 @@ class CvvNumberFormatterMask: CHRCardNumberMask {
     
     override func shouldChange(_ text: String, withReplacementString string: String, in range: NSRange) -> Bool {
         let newString = NSString(string: text).replacingCharacters(in: range, with: string)
-        return newString.count <= 3;
+        return newString.count <= 4
     }
     
     override func filteredString(from string: String, cursorPosition: UnsafeMutablePointer<UInt>?) -> String {
@@ -38,3 +38,4 @@ class CvvNumberFormatterMask: CHRCardNumberMask {
         return string
     }
 }
+
