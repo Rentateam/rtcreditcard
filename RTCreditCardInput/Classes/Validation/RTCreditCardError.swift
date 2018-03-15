@@ -7,11 +7,12 @@
 
 import Foundation
 
-public enum RTCreditCardError: String {
-    case kNotificationCardIncorrectNumber = "NotificationCardIncorrectNumber"
-    case kNotificationCardIncorrectCardholder = "kNotificationCardIncorrectCardholder"
-    case kNotificationCardIncorrectCVV = "NotificationCardIncorrectCVV"
-    case kNotificationCardIncorrectDate = "NotificationCardIncorrectDate"
-    case kNotificationCardInvalid = "NotificationCardInvalid"
-    case kNotificationCardFormValid = "NotificationCardFormValid"
+public enum RTCreditCardError {
+    case incorrectNumber
+    case incorrectCardholder
+    case incorrectCVV
+    case incorrectDate
+    case cardExpired
+    case invalid
+    case formValid
 }
