@@ -37,7 +37,7 @@ public class CardDefaultValidationService: CardValidationProtocol {
                 return .incorrectDate
             }
             
-            if inputedMonth > 12 {
+            if inputedMonth > 12 || inputedMonth <= 0 {
                 return .incorrectDate
             }
             
