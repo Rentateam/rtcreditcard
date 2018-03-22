@@ -87,14 +87,17 @@ public class RTCreditCardInput: NSObject {
     
     public func setCardNumber(cardNumber: String) {
         self.cardNumberTextField?.text = self.cardNumberFormatter.maskedString(from: cardNumber)
+        self.processValidation(shouldChangeResponder: false)
     }
     
     public func setExpirationDate(expirationDate: String) {
         self.cardExpirationDateTextField?.text = self.expirationDateFormatter.maskedString(from: expirationDate)
+        self.processValidation(shouldChangeResponder: false)
     }
     
     public func setCvv(cvv: String) {
         self.cardCVVTextField?.text = self.cardCVVFormatter.maskedString(from: cvv)
+        self.processValidation(shouldChangeResponder: false)
     }
     
     private func sendError(_ error: RTCreditCardError?) {
