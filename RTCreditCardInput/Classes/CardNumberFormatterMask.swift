@@ -12,7 +12,7 @@ class CardNumberFormatterMask: CHRCardNumberMask {
     
     override func shouldChange(_ text: String, withReplacementString string: String, in range: NSRange) -> Bool {
         let newString = NSString(string: text).replacingCharacters(in: range, with: string)
-        return newString.count <= 19
+        return newString.count <= 24
     }
     
     override func formattedString(from string: String, cursorPosition: UnsafeMutablePointer<UInt>?) -> String {
