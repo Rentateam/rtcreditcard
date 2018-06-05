@@ -15,7 +15,11 @@ public class CardDefaultValidationService: CardValidationProtocol {
         self.numberValidation = numberValidation
     }
     
-    public func getExpirationDateError(cardExpirationDateString: String) -> RTCreditCardError? {
+    public func getExpirationDateError(cardExpirationDateString: String?) -> RTCreditCardError? {
+        guard let cardExpirationDateString = cardExpirationDateString else {
+            return nil
+        }
+        
         if cardExpirationDateString.count < 5 {
             return .incorrectDate
         }
@@ -60,14 +64,22 @@ public class CardDefaultValidationService: CardValidationProtocol {
         return nil
     }
     
-    public func getCardNumberError(cardNumberString: String) -> RTCreditCardError? {
+    public func getCardNumberError(cardNumberString: String?) -> RTCreditCardError? {
+        guard let cardNumberString = cardNumberString else {
+            return nil
+        }
+        
         if !self.numberValidation.isCardNumberValid(cardNumberString) {
             return .incorrectNumber
         }
         return nil
     }
     
-    public func getCardHolderError(cardHolderString: String) -> RTCreditCardError? {
+    public func getCardHolderError(cardHolderString: String?) -> RTCreditCardError? {
+        guard let cardHolderString = cardHolderString else {
+            return nil
+        }
+        
         if cardHolderString.count > 0 {
             return nil
         } else {
@@ -75,7 +87,11 @@ public class CardDefaultValidationService: CardValidationProtocol {
         }
     }
     
-    public func getCVVError(cardNumberString:String, cvvString: String) -> RTCreditCardError? {
+    public func getCVVError(cardNumberString: String?, cvvString: String?) -> RTCreditCardError? {
+        guard let cardNumberString = cardNumberString, let cvvString = cvvString else {
+            return nil
+        }
+        
         if (cardNumberString.starts(with: "3") && cvvString.count == 4) || (!cardNumberString.starts(with: "3") && cvvString.count == 3) {
             return nil
         } else {

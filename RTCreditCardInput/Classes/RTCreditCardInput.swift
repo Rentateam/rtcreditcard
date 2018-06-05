@@ -26,6 +26,7 @@ public class RTCreditCardInput: NSObject {
     fileprivate var cardValidationDecorator: CardValidationDecoratorProtocol
     fileprivate var cardCheckDelegate: CardCheckDelegateProtocol
     private var validationWorkItem: DispatchWorkItem?
+    private var textFieldChanged: [UITextField: Bool] = [:]
     
     public init(cardValidation: CardValidationProtocol, cardValidationDecorator: CardValidationDecoratorProtocol, cardCheckDelegate: CardCheckDelegateProtocol) {
         self.cardValidation = cardValidation
@@ -41,7 +42,14 @@ public class RTCreditCardInput: NSObject {
         self.cardholderTextField = cardholderTextField
         self.cardExpirationDateTextField = cardExpirationDateTextField
         self.cardCVVTextField = cardCVVTextField
+        for textField in [cardNumberTextField, cardholderTextField, cardExpirationDateTextField, cardCVVTextField] {
+            textField?.addTarget(self, action: #selector(self.textFieldDidChange(textField:)), for: .editingChanged)
+        }
         self.activate()
+    }
+    
+    @objc func textFieldDidChange(textField: UITextField) {
+        self.textFieldChanged[textField] = true
     }
     
     public func getCardNumber() -> String? {
@@ -108,8 +116,24 @@ public class RTCreditCardInput: NSObject {
         }
     }
     
+    private func getCardNumberValue() -> String? {
+        return self.cardNumberTextField != nil && self.textFieldChanged[self.cardNumberTextField!] == true ? self.cardNumberFormatter.unmaskedString(from: (self.cardNumberTextField?.text ?? "")) : nil
+    }
+    
+    private func getDateExpirationValue() -> String? {
+        return self.cardExpirationDateTextField != nil && self.textFieldChanged[self.cardExpirationDateTextField!] == true ? self.expirationDateFormatter.unmaskedString(from: (self.cardExpirationDateTextField?.text ?? "")) : nil
+    }
+    
+    private func getCardHolderValue() -> String? {
+        return self.cardholderTextField != nil && self.textFieldChanged[self.cardholderTextField!] == true ? (self.cardholderTextField?.text ?? "") : nil
+    }
+    
+    private func getCvvValue() -> String? {
+        return self.cardCVVTextField != nil && self.textFieldChanged[self.cardCVVTextField!] == true ? (self.cardCVVTextField?.text ?? "") : nil
+    }
+    
     private func processValidation(shouldChangeResponder: Bool) {
-        let cardNumberError = self.cardValidation.getCardNumberError(cardNumberString: self.cardNumberFormatter.unmaskedString(from: (self.cardNumberTextField?.text ?? "")))
+        let cardNumberError = self.cardValidation.getCardNumberError(cardNumberString: self.getCardNumberValue())
         if cardNumberError != nil {
             self.onCardIncorrectNumber()
             self.sendError(.incorrectNumber)
@@ -122,7 +146,7 @@ public class RTCreditCardInput: NSObject {
             }
         }
         if self.cardholderTextField != nil {
-            let ownerError = self.cardValidation.getCardHolderError(cardHolderString: self.cardholderTextField?.text ?? "")
+            let ownerError = self.cardValidation.getCardHolderError(cardHolderString: self.getCardHolderValue())
             if ownerError != nil {
                 self.onCardIncorrectOwner()
                 self.sendError(.incorrectCardholder)
@@ -130,7 +154,7 @@ public class RTCreditCardInput: NSObject {
             }
         }
         
-        let expirationDateError = self.cardValidation.getExpirationDateError(cardExpirationDateString: self.expirationDateFormatter.unmaskedString(from: (self.cardExpirationDateTextField?.text ?? "")))
+        let expirationDateError = self.cardValidation.getExpirationDateError(cardExpirationDateString: self.getDateExpirationValue())
         if expirationDateError != nil {
             self.onCardIncorrectDate()
             self.sendError(expirationDateError)
@@ -138,8 +162,9 @@ public class RTCreditCardInput: NSObject {
         } else if shouldChangeResponder && (self.cardExpirationDateTextField?.isFirstResponder ?? false) {
             self.cardCVVTextField?.becomeFirstResponder()
         }
-        let cvvError = self.cardValidation.getCVVError(cardNumberString: self.cardNumberTextField?.text ?? "",
-                                                       cvvString: self.cardCVVTextField?.text ?? "")
+        
+        let cvvError = self.cardValidation.getCVVError(cardNumberString: self.getCardNumberValue(),
+                                                       cvvString: self.getCvvValue())
         if cvvError != nil {
             self.onCardIncorrectCVV()
             self.sendError(.incorrectCVV)
@@ -267,7 +292,7 @@ extension RTCreditCardInput: UITextFieldDelegate {
     public func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         var returnResult: Bool
         if textField.isEqual(self.cardNumberTextField) {
-            let cardNumberError = self.cardValidation.getCardNumberError(cardNumberString: self.cardNumberFormatter.unmaskedString(from: self.cardNumberTextField?.text ?? ""))
+            let cardNumberError = self.cardValidation.getCardNumberError(cardNumberString: self.getCardNumberValue())
             if cardNumberError != nil {
                 textField.becomeFirstResponder()
                 returnResult = false
@@ -280,7 +305,7 @@ extension RTCreditCardInput: UITextFieldDelegate {
                 returnResult = true
             }
         } else if textField.isEqual(self.cardholderTextField) {
-            let ownerError = self.cardValidation.getCardHolderError(cardHolderString: self.cardholderTextField?.text ?? "")
+            let ownerError = self.cardValidation.getCardHolderError(cardHolderString: self.getCardHolderValue())
             if ownerError != nil {
                 textField.becomeFirstResponder()
                 returnResult = false
@@ -289,7 +314,7 @@ extension RTCreditCardInput: UITextFieldDelegate {
                 returnResult = true
             }
         } else if textField.isEqual(self.cardExpirationDateTextField) {
-            let expirationDateError = self.cardValidation.getExpirationDateError(cardExpirationDateString: self.expirationDateFormatter.unmaskedString(from: self.cardExpirationDateTextField?.text ?? ""))
+            let expirationDateError = self.cardValidation.getExpirationDateError(cardExpirationDateString: self.getDateExpirationValue())
             if expirationDateError != nil {
                 textField.becomeFirstResponder()
                 returnResult = false
@@ -298,7 +323,8 @@ extension RTCreditCardInput: UITextFieldDelegate {
                 returnResult = true
             }
         } else if textField.isEqual(self.cardCVVTextField) {
-            let cvvError = self.cardValidation.getCVVError(cardNumberString: self.cardNumberTextField?.text ?? "", cvvString: self.cardCVVTextField?.text ?? "")
+            let cvvError = self.cardValidation.getCVVError(cardNumberString: self.getCardNumberValue(),
+                                                           cvvString: self.getCvvValue())
             if cvvError != nil {
                 textField.becomeFirstResponder()
                 returnResult = false
