@@ -88,11 +88,13 @@ public class CardDefaultValidationService: CardValidationProtocol {
     }
     
     public func getCVVError(cardNumberString: String?, cvvString: String?) -> RTCreditCardError? {
-        guard let cardNumberString = cardNumberString, let cvvString = cvvString else {
+        let cardNumberStartsWith3 = cardNumberString?.starts(with: "3") ?? false
+        
+        guard let cvvString = cvvString else {
             return nil
         }
         
-        if (cardNumberString.starts(with: "3") && cvvString.count == 4) || (!cardNumberString.starts(with: "3") && cvvString.count == 3) {
+        if (cardNumberStartsWith3 && cvvString.count == 4) || (!cardNumberStartsWith3 && cvvString.count == 3) {
             return nil
         } else {
             return .incorrectCVV
